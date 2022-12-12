@@ -240,7 +240,7 @@ class SEALSTest(unittest.TestCase, SamplingStrategiesTests):
     def test_initialize_index_default_hnsw_kwargs(self, num_samples=100):
         embeddings = np.random.rand(num_samples, 5)
         indices_unlabeled = np.random.choice(np.arange(num_samples), 10, replace=False)
-        hnsw_kwargs = dict()
+        hnsw_kwargs = {}
 
         index = SEALS.initialize_index(embeddings, indices_unlabeled, hnsw_kwargs)
 

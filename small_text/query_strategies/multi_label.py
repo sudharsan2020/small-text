@@ -113,8 +113,7 @@ class CategoryVectorInconsistencyAndRanking(QueryStrategy):
 
     def _entropy(self, numerator, denominator):
         ratio = numerator / (denominator + self.epsilon)
-        result = -ratio * np.log2(ratio + self.epsilon)
-        return result
+        return -ratio * np.log2(ratio + self.epsilon)
 
     def _compute_ranking(self, indices_unlabeled, proba_unlabeled):
         num_unlabeled, num_classes = proba_unlabeled.shape[0], proba_unlabeled.shape[1]
@@ -123,8 +122,10 @@ class CategoryVectorInconsistencyAndRanking(QueryStrategy):
         ranking_denom = num_classes * (num_unlabeled - 1)
 
         ranking_scores = [
-            sum([num_unlabeled - ranks[j, i]
-                 for j in range(num_classes)]) / ranking_denom
+            (
+                sum(num_unlabeled - ranks[j, i] for j in range(num_classes))
+                / ranking_denom
+            )
             for i in range(indices_unlabeled.shape[0])
         ]
         return np.array(ranking_scores)
@@ -136,11 +137,7 @@ class CategoryVectorInconsistencyAndRanking(QueryStrategy):
         margin = proba - np.tile(proba_sum[:, np.newaxis], (1, num_classes))
         margin = np.absolute(margin)
 
-        ranks = np.array([
-            np.argsort(margin[:, j])
-            for j in range(num_classes)
-        ])
-        return ranks
+        return np.array([np.argsort(margin[:, j]) for j in range(num_classes)])
 
     def __str__(self):
         return f'CategoryVectorInconsistencyAndRanking(batch_size={self.batch_size}, ' \

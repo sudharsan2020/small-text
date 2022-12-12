@@ -55,7 +55,7 @@ def get_splits(train_set, validation_set, weights=None, multi_label=False, valid
         result = train_set[indices_train], train_set[indices_valid]
 
     if weights is not None:
-        result += (weights,) if not has_validation_set else (weights[indices_train],)
+        result += (weights[indices_train], ) if has_validation_set else (weights, )
 
     return result
 
@@ -105,10 +105,7 @@ def prediction_result(proba, multi_label, num_classes, return_proba=False, enc=N
     else:
         predictions = np.argmax(proba, axis=1)
 
-    if return_proba:
-        return predictions, proba
-
-    return predictions
+    return (predictions, proba) if return_proba else predictions
 
 
 def empty_result(multi_label, num_classes, return_prediction=True, return_proba=True):
@@ -146,10 +143,9 @@ def empty_result(multi_label, num_classes, return_prediction=True, return_proba=
             return csr_matrix((0, num_classes), dtype=np.int64)
         else:
             return csr_matrix((0, num_classes), dtype=float)
+    elif return_prediction and return_proba:
+        return np.empty((0, num_classes), dtype=np.int64), np.empty(shape=(0, num_classes), dtype=float)
+    elif return_prediction:
+        return np.empty((0, num_classes), dtype=np.int64)
     else:
-        if return_prediction and return_proba:
-            return np.empty((0, num_classes), dtype=np.int64), np.empty(shape=(0, num_classes), dtype=float)
-        elif return_prediction:
-            return np.empty((0, num_classes), dtype=np.int64)
-        else:
-            return np.empty((0, num_classes), dtype=float)
+        return np.empty((0, num_classes), dtype=float)

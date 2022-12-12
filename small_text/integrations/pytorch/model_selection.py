@@ -54,14 +54,14 @@ class PytorchModelSelection(object):
 
     def add_model(self, model, epoch, **kwargs):
 
-        if not all(metric_name in kwargs for metric_name in self.metrics.keys()):
+        if any(metric_name not in kwargs for metric_name in self.metrics.keys()):
             raise ValueError('All metrics defined in the constructor must be reported. '
                              'Expected metrics: ' + ', '.join(self.metrics.keys()))
 
-        model_path = Path(self.save_directory).joinpath('model_epoch_{}.pt'.format(epoch))
+        model_path = Path(self.save_directory).joinpath(f'model_epoch_{epoch}.pt')
         torch.save(model.state_dict(), model_path)
         model_id = tuple(kwargs[metric.name] for metric in self.metrics.values()) \
-            + (epoch, len(self.models))
+                + (epoch, len(self.models))
         self.models[model_id] = model_path
 
     def select_best(self):
@@ -79,7 +79,7 @@ class PytorchModelSelection(object):
         keys = list(self.models.keys())
         last_model_key = keys[model_number-1]
 
-        logger.info('Using last model {}'.format(model_number))
+        logger.info(f'Using last model {model_number}')
         self.selected_model = model_number
 
         return self.models[last_model_key], last_model_key
@@ -87,11 +87,7 @@ class PytorchModelSelection(object):
     def _get_sort_key(self, x):
         data = []
         for idx, metric in enumerate(self.metrics.values()):
-            if metric.lower_is_better:
-                data += [x[0][idx]]
-            else:
-                data += [-x[0][idx]]
-
+            data += [x[0][idx]] if metric.lower_is_better else [-x[0][idx]]
         data += [x[0][self.IDX_EPOCH]]
 
         return tuple(data)
@@ -105,4 +101,4 @@ def validate_metrics(metrics):
 
     for metric in metrics:
         if not isinstance(metric, Metric):
-            raise ValueError('Invalid metric: "{}" ({})'.format(str(metric), type(metric)))
+            raise ValueError(f'Invalid metric: "{str(metric)}" ({type(metric)})')

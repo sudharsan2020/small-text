@@ -47,7 +47,7 @@ class EqualNumpyArray(object):
 def query_random_data(strategy, num_samples=100, n=10, use_embeddings=False, embedding_dim=100):
 
     x = np.random.rand(num_samples, 10)
-    kwargs = dict()
+    kwargs = {}
 
     if use_embeddings:
         kwargs['embeddings'] = np.random.rand(SamplingStrategiesTests.DEFAULT_NUM_SAMPLES,

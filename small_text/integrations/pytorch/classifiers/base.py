@@ -104,10 +104,7 @@ class PytorchClassifier(PytorchModelSelectionMixin, Classifier):
         proba = self.predict_proba(data_set)
         predictions = prediction_result(proba, self.multi_label, self.num_classes)
 
-        if return_proba:
-            return predictions, proba
-
-        return predictions
+        return (predictions, proba) if return_proba else predictions
 
     @abstractmethod
     def predict_proba(self, test_set):
@@ -127,13 +124,12 @@ class PytorchClassifier(PytorchModelSelectionMixin, Classifier):
     def _get_default_criterion(self, class_weights, use_sample_weights=False):
 
         reduction = 'none' if use_sample_weights else 'mean'
-        if self.multi_label or self.num_classes == 2:
-            loss = BCEWithLogitsLoss(pos_weight=class_weights, reduction=reduction)
-            if use_sample_weights:
-                loss = _LossAdapter2DTo1D(loss)
-            return loss
-        else:
+        if not self.multi_label and self.num_classes != 2:
             return CrossEntropyLoss(weight=class_weights, reduction=reduction)
+        loss = BCEWithLogitsLoss(pos_weight=class_weights, reduction=reduction)
+        if use_sample_weights:
+            loss = _LossAdapter2DTo1D(loss)
+        return loss
 
     def _get_default_early_stopping(self, early_stopping, early_stopping_no_improvement,
                                     early_stopping_acc, validations_per_epoch,
@@ -154,22 +150,18 @@ class PytorchClassifier(PytorchModelSelectionMixin, Classifier):
                 ])
         elif early_stopping == 'none':
             early_stopping = NoopEarlyStopping()
-        else:
-            if early_stopping_no_improvement != 5 or early_stopping_acc != -1:
-                warnings.warn(f'Both the fit() argument early_stopping and the __init__() '
-                              f'arguments "{kwarg_no_improvement_name}" / "early_stopping_acc" '
-                              f'have been used. In this case the fit() argument takes precedence. '
-                              f'The __init__() arguments are deprecated, so please use the '
-                              f'early stopping argument in fit() instead.',
-                              UserWarning)
+        elif early_stopping_no_improvement != 5 or early_stopping_acc != -1:
+            warnings.warn(f'Both the fit() argument early_stopping and the __init__() '
+                          f'arguments "{kwarg_no_improvement_name}" / "early_stopping_acc" '
+                          f'have been used. In this case the fit() argument takes precedence. '
+                          f'The __init__() arguments are deprecated, so please use the '
+                          f'early stopping argument in fit() instead.',
+                          UserWarning)
         return early_stopping
 
     @staticmethod
     def _get_default_model_selection(model_selection):
-        if model_selection == 'none':
-            return NoopModelSelection()
-
-        return ModelSelection()
+        return NoopModelSelection() if model_selection == 'none' else ModelSelection()
 
     def _get_optimizer_and_scheduler(self, optimizer, scheduler, num_epochs, sub_train):
 

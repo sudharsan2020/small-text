@@ -132,7 +132,7 @@ class KimCNNEmbeddingMixin(EmbeddingMixin):
         reduction_tmp = self.criterion.reduction
         self.criterion.reduction = 'none'
 
-        modules = dict({name: module for name, module in self.model.named_modules()})
+        modules = dict(dict(self.model.named_modules()))
         grad = module_selector(modules).weight.grad
         grad_size = grad.flatten().size(0)
 
@@ -144,7 +144,7 @@ class KimCNNEmbeddingMixin(EmbeddingMixin):
                 self.model.zero_grad()
                 loss[k].backward(retain_graph=True)
 
-                modules = dict({name: module for name, module in self.model.named_modules()})
+                modules = dict(dict(self.model.named_modules()))
                 params = module_selector(modules).weight.grad.flatten()
 
                 with torch.no_grad():
@@ -416,7 +416,7 @@ class KimCNNClassifier(KimCNNEmbeddingMixin, PytorchClassifier):
         train_iter = dataloader(data, self.mini_batch_size,
                                 self._create_collate_fn(use_sample_weights=weights is not None))
 
-        for i, (text, cls, weight) in enumerate(train_iter):
+        for text, cls, weight in train_iter:
             loss, acc = self._train_single_batch(text, cls, weight, optimizer)
             scheduler.step()
 
@@ -436,10 +436,7 @@ class KimCNNClassifier(KimCNNEmbeddingMixin, PytorchClassifier):
         output = self.model(text)
 
         with torch.no_grad():
-            if self.num_classes == 2:
-                target = F.one_hot(cls, 2).float()
-            else:
-                target = cls
+            target = F.one_hot(cls, 2).float() if self.num_classes == 2 else cls
         loss = self.criterion(output, target)
         loss = loss * weight
         loss = loss.mean()
@@ -484,11 +481,7 @@ class KimCNNClassifier(KimCNNEmbeddingMixin, PytorchClassifier):
             x, cls, weight = x.to(self.device), cls.to(self.device), weight.to(self.device)
 
             with torch.no_grad():
-                if self.num_classes == 2:
-                    target = F.one_hot(cls, 2).float()
-                else:
-                    target = cls
-
+                target = F.one_hot(cls, 2).float() if self.num_classes == 2 else cls
                 output = self.model(x)
                 loss = self.criterion(output, target)
                 loss = loss * weight

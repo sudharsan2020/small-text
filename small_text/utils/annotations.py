@@ -22,9 +22,12 @@ def deprecated(func_or_class=None, deprecated_in=None, to_be_removed_in=None, re
     if deprecated_in is None:
         raise ValueError('Keyword argument \'deprecated_in\' must be set.')
 
-    if func_or_class is not None:
-        if not inspect.isclass(func_or_class) and not inspect.isfunction(func_or_class):
-            raise ValueError('The @deprecated decorator requires a function or class')
+    if (
+        func_or_class is not None
+        and not inspect.isclass(func_or_class)
+        and not inspect.isfunction(func_or_class)
+    ):
+        raise ValueError('The @deprecated decorator requires a function or class')
 
     def _decorator(func_or_class):
         subject = 'class' if inspect.isclass(func_or_class) else 'function'
@@ -51,13 +54,17 @@ def deprecated(func_or_class=None, deprecated_in=None, to_be_removed_in=None, re
                           stacklevel=2)
             return func_or_class(*args, **kwargs)
         return wrapper
+
     return _decorator(func_or_class) if callable(func_or_class) else _decorator
 
 
 def experimental(func_or_class=None):
-    if func_or_class is not None:
-        if not inspect.isclass(func_or_class) and not inspect.isfunction(func_or_class):
-            raise ValueError('The @experimental decorator requires a function or class')
+    if (
+        func_or_class is not None
+        and not inspect.isclass(func_or_class)
+        and not inspect.isfunction(func_or_class)
+    ):
+        raise ValueError('The @experimental decorator requires a function or class')
 
     def _decorator(func_or_class):
         subject = 'class' if inspect.isclass(func_or_class) else 'function'
@@ -70,6 +77,7 @@ def experimental(func_or_class=None):
 
             return func_or_class(*args, **kwargs)
         return wrapper
+
     return _decorator(func_or_class) if callable(func_or_class) else _decorator
 
 

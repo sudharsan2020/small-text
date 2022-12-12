@@ -163,7 +163,7 @@ class ModelSelection(ModelSelectionManager):
 
     @staticmethod
     def _verify_metrics(metrics, required):
-        metric_names = set([metric.name for metric in metrics])
+        metric_names = {metric.name for metric in metrics}
         for required_metric_name in required:
             if required_metric_name not in metric_names:
                 raise ValueError(f'Required metric "{required_metric_name}" is not within the '
@@ -212,12 +212,11 @@ class ModelSelection(ModelSelectionManager):
             A model selection result object which contains the data of the selected model
             or None if no model could be selected.
         """
-        if select_by is not None:
-            if isinstance(select_by, str):
-                select_by = [select_by]
-        else:
+        if select_by is None:
             select_by = self.default_select_by
 
+        elif isinstance(select_by, str):
+            select_by = [select_by]
         # valid rows are rows where no early stopping has been triggered
         valid_rows = np.not_equal(self.models[ModelSelection.FIELD_NAME_EARLY_STOPPING], True)
         if not np.any(valid_rows):  # checks if we have no valid rows

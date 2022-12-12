@@ -152,7 +152,6 @@ class EarlyStopping(EarlyStoppingHandler):
 
         if improvement:
             self._index_best = index_last
-            return False
         else:
             history_since_previous_best = self._history[self._index_best + 1:][self.metric.name]
             rows_not_nan = np.logical_not(np.isnan(history_since_previous_best))
@@ -160,7 +159,8 @@ class EarlyStopping(EarlyStoppingHandler):
                 logging.debug(f'Early stopping: Patience exceeded.'
                               f'{{value={index_last-self._index_best}, patience={self.patience}}}')
                 return True
-            return False
+
+        return False
 
     def add_to_history(self, epoch, measured_values):
         count = (self._history['epoch'] == epoch).sum()
@@ -199,9 +199,10 @@ class EarlyStoppingOrCondition(EarlyStoppingHandler):
         measured_values : dict of str to float
             A dictionary of measured values.
         """
-        results = []
-        for early_stopping_handler in self.early_stopping_handlers:
-            results.append(early_stopping_handler.check_early_stop(epoch, measured_values))
+        results = [
+            early_stopping_handler.check_early_stop(epoch, measured_values)
+            for early_stopping_handler in self.early_stopping_handlers
+        ]
         return np.any(results)
 
 
@@ -232,7 +233,8 @@ class EarlyStoppingAndCondition(EarlyStoppingHandler):
         measured_values : dict of str to float
             A dictionary of measured values.
         """
-        results = []
-        for early_stopping_handler in self.early_stopping_handlers:
-            results.append(early_stopping_handler.check_early_stop(epoch, measured_values))
+        results = [
+            early_stopping_handler.check_early_stop(epoch, measured_values)
+            for early_stopping_handler in self.early_stopping_handlers
+        ]
         return np.any(results)

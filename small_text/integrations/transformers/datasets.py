@@ -90,9 +90,7 @@ class TransformersDataset(PytorchDataset):
         if self.multi_label:
             label_list = [label for lst in label_list for label in lst]
 
-        label_list = [label for label in label_list if label > LABEL_UNLABELED]
-
-        return label_list
+        return [label for label in label_list if label > LABEL_UNLABELED]
 
     @property
     def x(self):
@@ -111,19 +109,18 @@ class TransformersDataset(PytorchDataset):
 
     @property
     def y(self):
-        if self.multi_label:
-            label_list = [d[self.INDEX_LABEL] if d[self.INDEX_LABEL] is not None else []
-                          for d in self._data]
-            if self.track_target_labels:
-                # TODO: int() cast should not be necessary here
-                num_classes = int(self.target_labels.max()) + 1
-            else:
-                num_classes = len(self.target_labels)
-            return list_to_csr(label_list, shape=(len(self.data), num_classes))
-        else:
+        if not self.multi_label:
             return np.array([d[self.INDEX_LABEL] if d[self.INDEX_LABEL] is not None
                              else LABEL_UNLABELED
                              for d in self._data], dtype=int)
+        label_list = [d[self.INDEX_LABEL] if d[self.INDEX_LABEL] is not None else []
+                      for d in self._data]
+        num_classes = (
+            int(self.target_labels.max()) + 1
+            if self.track_target_labels
+            else len(self.target_labels)
+        )
+        return list_to_csr(label_list, shape=(len(self.data), num_classes))
 
     @y.setter
     def y(self, y):

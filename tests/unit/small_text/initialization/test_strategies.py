@@ -20,7 +20,7 @@ class RandomInitializationTest(unittest.TestCase):
 
         self.assertEqual(10, len(indices))
         self.assertEqual(10, len(np.unique(indices)))
-        self.assertTrue(all([i >= 0 and i < len(x) for i in indices]))
+        self.assertTrue(all(i >= 0 and i < len(x) for i in indices))
 
     def test_random_initialization_num_samples_too_large(self):
 

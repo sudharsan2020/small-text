@@ -36,7 +36,7 @@ class SerializationTest(unittest.TestCase):
         query_strategy = RandomSampling()
 
         with tempfile.TemporaryDirectory() as tmp_dir_name:
-            file_str = tmp_dir_name + 'active_learner.ser'
+            file_str = f'{tmp_dir_name}active_learner.ser'
 
             active_learner = get_initialized_active_learner(clf_factory, query_strategy, dataset,
                                                             num_classes=num_classes)

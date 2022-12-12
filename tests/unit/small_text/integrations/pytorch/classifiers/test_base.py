@@ -158,7 +158,7 @@ class SimplePytorchClassifierTest(unittest.TestCase):
 
         self.assertTrue(isinstance(model_selection, ModelSelection))
         self.assertEqual(4, len(model_selection.metrics))
-        metric_names = set([metric.name for metric in model_selection.metrics])
+        metric_names = {metric.name for metric in model_selection.metrics}
         for metric_name in ['val_loss', 'val_acc', 'train_loss', 'train_acc']:
             self.assertTrue(metric_name in metric_names)
 

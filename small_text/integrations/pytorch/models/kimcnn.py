@@ -25,6 +25,7 @@ KimCNN implementation is based on:
 https://github.com/Johnxjp/cnn_text_classification/tree/d05e8ede5bbfd2a4de3c2df92ea705cab0e803f2
 by John Lingi (@Johnxjp, MIT-licensed)
 """
+
 from small_text.integrations.pytorch.exceptions import PytorchNotFoundError
 
 try:
@@ -32,7 +33,9 @@ try:
     import torch.nn as nn
     import torch.nn.functional as F  # noqa: N812
 except ImportError as e:
-    raise PytorchNotFoundError('Could not import pytorch or one of its dependencies: ' + str(e))
+    raise PytorchNotFoundError(
+        f'Could not import pytorch or one of its dependencies: {str(e)}'
+    )
 
 
 class KimCNN(nn.Module):

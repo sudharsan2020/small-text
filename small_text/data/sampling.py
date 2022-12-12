@@ -70,23 +70,26 @@ def stratified_sampling(y, n_samples=10, enforce_min_occurrence=True):
     counts = _get_class_histogram(y, num_classes)
     expected_samples_per_class = np.floor(counts * (float(n_samples) / counts.sum())).astype(int)
 
-    if enforce_min_occurrence and expected_samples_per_class.min() == 0:
-        if n_samples > num_classes and np.unique(y).shape[0] == num_classes:  # feasibility check
-            expected_samples_per_class += 1
+    if (
+        enforce_min_occurrence
+        and expected_samples_per_class.min() == 0
+        and n_samples > num_classes
+        and np.unique(y).shape[0] == num_classes
+    ):
+        expected_samples_per_class += 1
 
-            num_excessive_samples = expected_samples_per_class.sum() - n_samples
+        num_excessive_samples = expected_samples_per_class.sum() - n_samples
+        class_indices = np.arange(counts.shape[0])[expected_samples_per_class > 1]
+        round_robin_index = 0
+        for _ in range(num_excessive_samples):
+            while expected_samples_per_class[class_indices[round_robin_index]] <= 1:
+                round_robin_index += 1
+                round_robin_index %= class_indices.shape[0]
+
+            expected_samples_per_class[class_indices[round_robin_index]] -= 1
+
             class_indices = np.arange(counts.shape[0])[expected_samples_per_class > 1]
-            round_robin_index = 0
-            for i in range(num_excessive_samples):
-
-                while expected_samples_per_class[class_indices[round_robin_index]] <= 1:
-                    round_robin_index += 1
-                    round_robin_index %= class_indices.shape[0]
-
-                expected_samples_per_class[class_indices[round_robin_index]] -= 1
-
-                class_indices = np.arange(counts.shape[0])[expected_samples_per_class > 1]
-                assert expected_samples_per_class[class_indices].sum() > 0
+            assert expected_samples_per_class[class_indices].sum() > 0
 
     return _random_sampling(n_samples, num_classes, expected_samples_per_class, counts, y)
 
@@ -149,7 +152,7 @@ def _random_sampling(n_samples, num_classes, expected_samples_per_class, counts,
             remainder += diff
 
     if remainder != 0:
-        classes = np.array([i for i in range(num_classes)])
+        classes = np.array(list(range(num_classes)))
 
         counts_remaining = counts - expected_samples_per_class
 

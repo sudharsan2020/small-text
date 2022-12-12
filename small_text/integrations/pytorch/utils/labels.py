@@ -11,7 +11,7 @@ def get_flattened_unique_labels(dataset):
             d[dataset.INDEX_LABEL] for d in dataset.data
             if d[dataset.INDEX_LABEL] is not None and len(d[dataset.INDEX_LABEL]) > 0
         ]
-        if len(labels) == 0:
+        if not labels:
             labels = np.array([], dtype=int)
         else:
             labels = np.concatenate([d[dataset.INDEX_LABEL] for d in dataset.data

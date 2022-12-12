@@ -62,7 +62,7 @@ class ExpectedGradientLength(QueryStrategy):
 
         offset = 0
         with pbar_context as pbar:
-            for i, (dataset, *_) in enumerate(dataset_iter):
+            for dataset, *_ in dataset_iter:
                 self.compute_gradient_lengths(clf, criterion, gradient_lengths, offset, dataset)
 
                 batch_len = dataset.size(0)
@@ -217,7 +217,7 @@ class ExpectedGradientLengthMaxWord(ExpectedGradientLength):
         self.aggregate_gradient_lengths_batch(batch_len, gradient_lengths, gradients, offset)
 
     def compute_gradient_length(self, clf, text, sm, gradients, j, k):
-        modules = dict({name: module for name, module in clf.model.named_modules()})
+        modules = dict(dict(clf.model.named_modules()))
 
         params = list(modules[self.layer_name].parameters())
         assert len(params) == 1
@@ -263,7 +263,7 @@ class ExpectedGradientLengthLayer(ExpectedGradientLength):
 
         _assert_layer_exists(clf.model, self.layer_name)
 
-        modules = dict({name: module for name, module in clf.model.named_modules()})
+        modules = dict(dict(clf.model.named_modules()))
         params = [param.grad.flatten() for param in modules[self.layer_name].parameters()
                   if param.requires_grad]
         params = torch.cat(params)

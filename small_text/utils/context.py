@@ -11,10 +11,8 @@ class NullProgressBar(object):
 
 
 def build_pbar_context(pbar_type, tqdm_kwargs=dict()):
-    if pbar_type == 'tqdm':
-        from tqdm import tqdm
-        pbar_context = tqdm(**tqdm_kwargs)
-    else:
-        pbar_context = NullProgressBar()
+    if pbar_type != 'tqdm':
+        return NullProgressBar()
 
-    return pbar_context
+    from tqdm import tqdm
+    return tqdm(**tqdm_kwargs)

@@ -111,7 +111,7 @@ def linkcode_resolve(domain, info):
     if '.' in info['fullname']:
         return None
     filename = info['module'].replace('.', '/') + '.py'
-    return 'https://github.com/webis-de/small-text/blob/v%s/%s' % (str(parse(version)), filename)
+    return f'https://github.com/webis-de/small-text/blob/v{str(parse(version))}/{filename}'
 
 # -- Intersphinx------------------- -------------------------------------------
 

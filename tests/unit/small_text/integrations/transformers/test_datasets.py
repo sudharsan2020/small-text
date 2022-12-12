@@ -45,7 +45,9 @@ class TransformersDatasetTest(unittest.TestCase):
 
     def _random_data(self, num_samples=NUM_SAMPLES, num_classes=NUM_LABELS):
         if self.target_labels not in ['explicit', 'inferred']:
-            raise ValueError('Invalid test parameter value for target_labels:' + self.target_labels)
+            raise ValueError(
+                f'Invalid test parameter value for target_labels:{self.target_labels}'
+            )
 
         return random_transformer_dataset(num_samples=num_samples,
                                           multi_label=self.multi_label,
@@ -63,17 +65,16 @@ class TransformersDatasetTest(unittest.TestCase):
 
     def test_init_when_some_samples_are_unlabeled(self):
         ds = self._random_data(num_samples=self.NUM_SAMPLES)
+        data_list = list(ds.data[2])
         if self.multi_label:
-            data_list = list(ds.data[2])
             data_list[TransformersDataset.INDEX_LABEL] = []
-            ds.data[2] = tuple(data_list)
         else:
-            data_list = list(ds.data[2])
             data_list[TransformersDataset.INDEX_LABEL] = LABEL_UNLABELED
-            ds.data[2] = tuple(data_list)
-
+        ds.data[2] = tuple(data_list)
         if self.target_labels not in ['explicit', 'inferred']:
-            raise ValueError('Invalid test parameter value for target_labels:' + self.target_labels)
+            raise ValueError(
+                f'Invalid test parameter value for target_labels:{self.target_labels}'
+            )
 
         target_labels = None if self.target_labels == 'inferred' else ds.target_labels
 
@@ -84,19 +85,17 @@ class TransformersDatasetTest(unittest.TestCase):
 
     def test_init_when_all_samples_are_unlabeled(self):
         ds = self._random_data(num_samples=self.NUM_SAMPLES)
-        if self.multi_label:
-            for i in range(len(ds)):
-                data_list = list(ds.data[i])
+        for i in range(len(ds)):
+            data_list = list(ds.data[i])
+            if self.multi_label:
                 data_list[TransformersDataset.INDEX_LABEL] = []
-                ds.data[i] = tuple(data_list)
-        else:
-            for i in range(len(ds)):
-                data_list = list(ds.data[i])
+            else:
                 data_list[TransformersDataset.INDEX_LABEL] = LABEL_UNLABELED
-                ds.data[i] = tuple(data_list)
-
+            ds.data[i] = tuple(data_list)
         if self.target_labels not in ['explicit', 'inferred']:
-            raise ValueError('Invalid test parameter value for target_labels:' + self.target_labels)
+            raise ValueError(
+                f'Invalid test parameter value for target_labels:{self.target_labels}'
+            )
 
         target_labels = None if self.target_labels == 'inferred' else ds.target_labels
 
@@ -331,12 +330,12 @@ class TransformersDatasetViewSingleLabelExplicitTest(unittest.TestCase, _Transfo
         assert self.NUM_SAMPLES > self.NUM_SAMPLES_VIEW
         self.multi_label = False
 
-        dataset = random_transformer_dataset(num_samples=self.NUM_SAMPLES,
-                                             multi_label=self.multi_label,
-                                             num_classes=num_labels,
-                                             target_labels=self.target_labels)
-
-        return dataset
+        return random_transformer_dataset(
+            num_samples=self.NUM_SAMPLES,
+            multi_label=self.multi_label,
+            num_classes=num_labels,
+            target_labels=self.target_labels,
+        )
 
 
 class TransformersDatasetViewSingleLabelInferredTest(unittest.TestCase,
@@ -349,12 +348,12 @@ class TransformersDatasetViewSingleLabelInferredTest(unittest.TestCase,
         assert self.NUM_SAMPLES > self.NUM_SAMPLES_VIEW
         self.multi_label = False
 
-        dataset = random_transformer_dataset(num_samples=self.NUM_SAMPLES,
-                                             multi_label=self.multi_label,
-                                             num_classes=num_labels,
-                                             target_labels=self.target_labels)
-
-        return dataset
+        return random_transformer_dataset(
+            num_samples=self.NUM_SAMPLES,
+            multi_label=self.multi_label,
+            num_classes=num_labels,
+            target_labels=self.target_labels,
+        )
 
 
 class TransformersDatasetViewMultiLabelExplicitTest(unittest.TestCase, _TransformersDatasetViewTest):
@@ -366,12 +365,12 @@ class TransformersDatasetViewMultiLabelExplicitTest(unittest.TestCase, _Transfor
         assert self.NUM_SAMPLES > self.NUM_SAMPLES_VIEW
         self.multi_label = True
 
-        dataset = random_transformer_dataset(num_samples=self.NUM_SAMPLES,
-                                             multi_label=self.multi_label,
-                                             num_classes=num_labels,
-                                             target_labels=self.target_labels)
-
-        return dataset
+        return random_transformer_dataset(
+            num_samples=self.NUM_SAMPLES,
+            multi_label=self.multi_label,
+            num_classes=num_labels,
+            target_labels=self.target_labels,
+        )
 
 
 class TransformersDatasetViewMultiLabelInferredTest(unittest.TestCase, _TransformersDatasetViewTest):
@@ -383,9 +382,9 @@ class TransformersDatasetViewMultiLabelInferredTest(unittest.TestCase, _Transfor
         assert self.NUM_SAMPLES > self.NUM_SAMPLES_VIEW
         self.multi_label = True
 
-        dataset = random_transformer_dataset(num_samples=self.NUM_SAMPLES,
-                                             multi_label=self.multi_label,
-                                             num_classes=num_labels,
-                                             target_labels=self.target_labels)
-
-        return dataset
+        return random_transformer_dataset(
+            num_samples=self.NUM_SAMPLES,
+            multi_label=self.multi_label,
+            num_classes=num_labels,
+            target_labels=self.target_labels,
+        )

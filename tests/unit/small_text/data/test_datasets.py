@@ -53,7 +53,9 @@ class SklearnDatasetTest(unittest.TestCase):
         x, y = random_matrix_data(self.matrix_type, self.labels_type, num_samples=num_samples,
                                   num_labels=num_labels)
         if self.target_labels not in ['explicit', 'inferred']:
-            raise ValueError('Invalid test parameter value for target_labels:' + self.target_labels)
+            raise ValueError(
+                f'Invalid test parameter value for target_labels:{self.target_labels}'
+            )
 
         if self.labels_type == 'sparse':
             target_labels = None if self.target_labels == 'inferred' else np.unique(y.indices)
@@ -61,10 +63,7 @@ class SklearnDatasetTest(unittest.TestCase):
             target_labels = None if self.target_labels == 'inferred' else np.unique(y)
         dataset = SklearnDataset(x, y, target_labels=target_labels)
 
-        if return_data:
-            return dataset, x, y
-        else:
-            return dataset
+        return (dataset, x, y) if return_data else dataset
 
     def test_init(self):
         ds, x, y = self._dataset(num_samples=self.NUM_SAMPLES, return_data=True)
@@ -102,10 +101,12 @@ class SklearnDatasetTest(unittest.TestCase):
             y_list[2] = []
             y = list_to_csr(y_list, y.shape)
         else:
-            y[0:10] = [LABEL_UNLABELED] * 10
+            y[:10] = [LABEL_UNLABELED] * 10
 
         if self.target_labels not in ['explicit', 'inferred']:
-            raise ValueError('Invalid test parameter value for target_labels:' + self.target_labels)
+            raise ValueError(
+                f'Invalid test parameter value for target_labels:{self.target_labels}'
+            )
 
         target_labels = None if self.target_labels == 'inferred' else np.arange(5)
 
@@ -122,7 +123,9 @@ class SklearnDatasetTest(unittest.TestCase):
             y[:] = LABEL_UNLABELED
 
         if self.target_labels not in ['explicit', 'inferred']:
-            raise ValueError('Invalid test parameter value for target_labels:' + self.target_labels)
+            raise ValueError(
+                f'Invalid test parameter value for target_labels:{self.target_labels}'
+            )
 
         target_labels = None if self.target_labels == 'inferred' else np.arange(5)
 
@@ -358,13 +361,13 @@ class _DatasetViewTest(object):
     def test_init_with_numpy_slice(self):
         dataset = self._dataset()
         self.assertEqual(100, len(dataset))
-        dataset_view = SklearnDatasetView(dataset, np.s_[0:10])
+        dataset_view = SklearnDatasetView(dataset, np.s_[:10])
         self.assertEqual(10, len(dataset_view))
 
     def test_get_dataset(self):
         dataset = self._dataset()
         self.assertEqual(100, len(dataset))
-        dataset_view = SklearnDatasetView(dataset, np.s_[0:10])
+        dataset_view = SklearnDatasetView(dataset, np.s_[:10])
         self.assertEqual(dataset, dataset_view.dataset)
 
     def test_get_x(self, subset_size=10):
@@ -378,7 +381,7 @@ class _DatasetViewTest(object):
 
     def test_set_x(self, subset_size=10):
         dataset = self._dataset()
-        dataset_view = SklearnDatasetView(dataset, np.s_[0:subset_size])
+        dataset_view = SklearnDatasetView(dataset, np.s_[:subset_size])
         with self.assertRaises(UnsupportedOperationException):
             dataset_view.x = self._dataset(num_samples=subset_size)
 
@@ -390,7 +393,7 @@ class _DatasetViewTest(object):
 
     def test_set_y(self, subset_size=10, num_labels=2):
         dataset = self._dataset()
-        dataset_view = SklearnDatasetView(dataset, np.s_[0:subset_size])
+        dataset_view = SklearnDatasetView(dataset, np.s_[:subset_size])
         with self.assertRaises(UnsupportedOperationException):
             dataset_view.y = np.random.randint(0, high=num_labels, size=subset_size)
 
@@ -409,7 +412,7 @@ class _DatasetViewTest(object):
 
     def test_set_target_labels(self, subset_size=10):
         dataset = self._dataset()
-        dataset_view = SklearnDatasetView(dataset, np.s_[0:subset_size])
+        dataset_view = SklearnDatasetView(dataset, np.s_[:subset_size])
         with self.assertRaises(UnsupportedOperationException):
             dataset_view.target_labels = np.array([0])
 
@@ -584,10 +587,7 @@ class SklearnDatasetViewTest(unittest.TestCase, _DatasetViewTest):
 
         dataset = SklearnDataset(x, y, target_labels=target_labels)
 
-        if return_data:
-            return dataset, x, y
-        else:
-            return dataset
+        return (dataset, x, y) if return_data else dataset
 
 
 @parameterized_class([{'matrix_type': 'sparse', 'labels_type': 'dense', 'target_labels': 'explicit'},
@@ -627,10 +627,7 @@ class NestedDatasetViewTest(unittest.TestCase, _DatasetViewTest):
             np.s_[:]
         )
 
-        if return_data:
-            return dataset_view, x, y
-        else:
-            return dataset_view
+        return (dataset_view, x, y) if return_data else dataset_view
 
     def _clone_test(self, ds_view):
         ds_cloned = ds_view.clone()

@@ -47,8 +47,9 @@ class QueryStrategy(ABC):
             raise EmptyPoolException('No unlabeled indices available. Cannot query an empty pool.')
 
         if n > len(indices_unlabeled):
-            raise PoolExhaustedException('Pool exhausted: {} available / {} requested'
-                                         .format(len(indices_unlabeled), n))
+            raise PoolExhaustedException(
+                f'Pool exhausted: {len(indices_unlabeled)} available / {n} requested'
+            )
 
 
 class RandomSampling(QueryStrategy):
@@ -261,16 +262,18 @@ class EmbeddingBasedQueryStrategy(QueryStrategy):
             try:
                 embeddings, proba = clf.embed(dataset[indices_subset_all],
                                               return_proba=True, pbar=pbar, **embed_kwargs) \
-                    if embeddings is None else embeddings
+                        if embeddings is None else embeddings
 
             except TypeError as e:
-                if 'got an unexpected keyword argument \'return_proba\'' in e.args[0]:
-                    embeddings = clf.embed(dataset[indices_subset_all], pbar=pbar,
-                                           **embed_kwargs) if embeddings is None else embeddings
-                    proba = None
-                else:
+                if (
+                    'got an unexpected keyword argument \'return_proba\''
+                    not in e.args[0]
+                ):
                     raise e
 
+                embeddings = clf.embed(dataset[indices_subset_all], pbar=pbar,
+                                       **embed_kwargs) if embeddings is None else embeddings
+                proba = None
         subset = dataset[indices_subset_all]
         subset_indices_unlabeled = np.arange(indices_unlabeled.shape[0])
         subset_indices_labeled = np.arange(indices_unlabeled.shape[0],
@@ -398,7 +401,7 @@ class EmbeddingKMeans(EmbeddingBasedQueryStrategy):
 
         for i in range(cluster_centers.shape[0]):
             sim = EmbeddingKMeans._similarity(cluster_centers[None, i], vectors, normalized)
-            sim[0, indices[0:i]] = -np.inf
+            sim[0, indices[:i]] = -np.inf
             indices[i] = sim.argmax()
 
         return indices
@@ -484,9 +487,7 @@ class ContrastiveActiveLearning(EmbeddingBasedQueryStrategy):
             offset += batch_idx.shape[0]
 
         scores = np.array(scores)
-        indices = np.argpartition(-scores, n)[:n]
-
-        return indices
+        return np.argpartition(-scores, n)[:n]
 
     def __str__(self):
         return f'ContrastiveActiveLearning(k={self.k}, ' \
@@ -529,10 +530,9 @@ class DiscriminativeActiveLearning(QueryStrategy):
         self._validate_query_input(indices_unlabeled, n)
 
         query_sizes = self._get_query_sizes(self.num_iterations, n)
-        indices = self.discriminative_active_learning(dataset, indices_unlabeled, indices_labeled,
-                                                      query_sizes)
-
-        return indices
+        return self.discriminative_active_learning(
+            dataset, indices_unlabeled, indices_labeled, query_sizes
+        )
 
     def discriminative_active_learning(self, dataset, indices_unlabeled, indices_labeled,
                                        query_sizes):
@@ -564,11 +564,12 @@ class DiscriminativeActiveLearning(QueryStrategy):
             raise ValueError('num_iterations cannot be greater than the query_size n')
 
         query_size = int(n / num_iterations)
-        query_sizes = [query_size if i < num_iterations - 1
-                       else n - (num_iterations - 1) * query_size
-                       for i, _ in enumerate(range(num_iterations))]
-
-        return query_sizes
+        return [
+            query_size
+            if i < num_iterations - 1
+            else n - (num_iterations - 1) * query_size
+            for i, _ in enumerate(range(num_iterations))
+        ]
 
     def _train_and_get_most_confident(self, ds, indices_unlabeled, indices_labeled, q):
 
@@ -679,13 +680,11 @@ class SEALS(QueryStrategy):
                 self.embeddings = normalize(self.embeddings, axis=1)
 
             self.nn = self.initialize_index(self.embeddings, indices_unlabeled, self.hnsw_kwargs)
-            self.indices_unlabeled = set(indices_unlabeled)
         else:
             recently_removed_elements = self.indices_unlabeled - set(indices_unlabeled)
             for el in recently_removed_elements:
                 self.nn.mark_deleted(el)
-            self.indices_unlabeled = set(indices_unlabeled)
-
+        self.indices_unlabeled = set(indices_unlabeled)
         indices_nn, _ = self.nn.knn_query(self.embeddings[indices_labeled], k=self.k)
         indices_nn = np.unique(indices_nn.astype(int).flatten())
 

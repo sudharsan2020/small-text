@@ -45,7 +45,7 @@ class KimCNNEmbeddingTest(unittest.TestCase):
 
         _, train = trec_dataset()  # use small test set as train
 
-        kwargs = dict()
+        kwargs = {}
         if self.embedding_method == KimCNNEmbeddingMixin.EMBEDDING_METHOD_GRADIENT:
             kwargs['module_selector'] = default_module_selector
 
@@ -66,7 +66,7 @@ class KimCNNEmbeddingTest(unittest.TestCase):
             self.assertEqual(len(train), embeddings.shape[0])
             if self.embedding_method == KimCNNEmbeddingMixin.EMBEDDING_METHOD_GRADIENT:
                 gradient_length = classifier.model.out_channels * classifier.model.num_kernels \
-                                  * classifier.model.num_classes
+                                      * classifier.model.num_classes
                 self.assertEqual(classifier.num_classes * gradient_length,
                                  embeddings.shape[1])
             else:
@@ -77,7 +77,7 @@ class KimCNNEmbeddingTest(unittest.TestCase):
 
         _, train = trec_dataset()  # use small test set as train
 
-        kwargs = dict()
+        kwargs = {}
 
         if self.embedding_method == KimCNNEmbeddingMixin.EMBEDDING_METHOD_GRADIENT:
             kwargs['module_selector'] = default_module_selector
@@ -101,7 +101,7 @@ class KimCNNEmbeddingTest(unittest.TestCase):
             self.assertEqual(len(train), embeddings.shape[0])
             if self.embedding_method == KimCNNEmbeddingMixin.EMBEDDING_METHOD_GRADIENT:
                 gradient_length = classifier.model.out_channels * classifier.model.num_kernels \
-                                  * classifier.model.num_classes
+                                      * classifier.model.num_classes
                 self.assertEqual(classifier.num_classes * gradient_length,
                                  embeddings.shape[1])
             else:

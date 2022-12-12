@@ -137,11 +137,7 @@ class PoolBasedActiveLearner(AbstractPoolBasedActiveLearner):
         self._index_to_position = self._build_index_to_position_dict()
         self.y = y_initial
 
-        if isinstance(self.y, csr_matrix):
-            self.multi_label = True
-        else:
-            self.multi_label = False
-
+        self.multi_label = isinstance(self.y, csr_matrix)
         if indices_ignored is not None:
             self.indices_ignored = indices_ignored
         else:
@@ -219,9 +215,9 @@ class PoolBasedActiveLearner(AbstractPoolBasedActiveLearner):
             for creating a validation set.
         """
         if self.indices_queried.shape[0] != y.shape[0]:
-            raise ValueError('Query-update mismatch: indices queried - {} / labels provided - {}'
-                             .format(self.indices_queried.shape[0], y.shape[0])
-                             )
+            raise ValueError(
+                f'Query-update mismatch: indices queried - {self.indices_queried.shape[0]} / labels provided - {y.shape[0]}'
+            )
 
         ignored = get_ignored_labels_mask(y, LABEL_IGNORED)
         if ignored.any():
@@ -357,11 +353,10 @@ class PoolBasedActiveLearner(AbstractPoolBasedActiveLearner):
         file : str or path or file
             File to be loaded.
         """
-        if isinstance(file, (str, Path)):
-            with open(file, 'rb') as f:
-                return cls._load(f)
-        else:
+        if not isinstance(file, (str, Path)):
             return cls._load(file)
+        with open(file, 'rb') as f:
+            return cls._load(f)
 
     @classmethod
     def _load(cls, file_handle):

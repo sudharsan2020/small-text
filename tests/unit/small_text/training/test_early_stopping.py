@@ -13,9 +13,9 @@ class NoopStoppingHandlerTest(unittest.TestCase):
 
     def test_stopping_handler_all(self):
         stopping_handler = NoopEarlyStopping()
-        self.assertFalse(stopping_handler.check_early_stop(0, dict()))
-        self.assertFalse(stopping_handler.check_early_stop(0, dict()))
-        self.assertFalse(stopping_handler.check_early_stop(1, dict()))
+        self.assertFalse(stopping_handler.check_early_stop(0, {}))
+        self.assertFalse(stopping_handler.check_early_stop(0, {}))
+        self.assertFalse(stopping_handler.check_early_stop(1, {}))
 
 
 class EarlyStoppingTest(unittest.TestCase):

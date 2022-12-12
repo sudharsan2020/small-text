@@ -17,9 +17,7 @@ class SklearnClassifierFactory(AbstractClassifierFactory):
     def __init__(self, base_estimator, num_classes, kwargs={}):
         if not issubclass(type(base_estimator), BaseEstimator):
             raise ValueError(
-                'Given classifier template must be a subclass of '
-                'sklearn.base.BaseEstimator. Encountered class was: {}.'
-                .format(str(base_estimator.__class__))
+                f'Given classifier template must be a subclass of sklearn.base.BaseEstimator. Encountered class was: {str(base_estimator.__class__)}.'
             )
 
         self.base_estimator = base_estimator

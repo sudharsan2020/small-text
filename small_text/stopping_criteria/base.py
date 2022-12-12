@@ -83,7 +83,4 @@ class DeltaFScore(StoppingCriterion):
 
             self.delta_history = self.delta_history[-self.window_size:]
 
-            if np.all(np.array(self.delta_history) < self.threshold):
-                return True
-            else:
-                return False
+            return bool(np.all(np.array(self.delta_history) < self.threshold))

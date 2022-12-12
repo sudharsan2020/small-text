@@ -70,10 +70,13 @@ class FineTuningArguments(object):
 
         if base_lr <= 0:
             raise ValueError('FineTuningArguments: base_lr must be greater than zero')
-        if layerwise_gradient_decay:
-            if not (0 < layerwise_gradient_decay < 1 or layerwise_gradient_decay == -1):
-                raise ValueError('FineTuningArguments: valid values for layerwise_gradient_decay '
-                                 'are between 0 and 1 (or set it to -1 to disable it)')
+        if (
+            layerwise_gradient_decay
+            and not 0 < layerwise_gradient_decay < 1
+            and layerwise_gradient_decay != -1
+        ):
+            raise ValueError('FineTuningArguments: valid values for layerwise_gradient_decay '
+                             'are between 0 and 1 (or set it to -1 to disable it)')
 
         self.base_lr = base_lr
         self.layerwise_gradient_decay = layerwise_gradient_decay
@@ -112,12 +115,19 @@ def _get_layer_params(model, base_lr, fine_tuning_arguments):
     use_gradual_unfreezing = isinstance(fine_tuning_arguments.gradual_unfreezing, int) and \
         fine_tuning_arguments.gradual_unfreezing > 0
 
-    start_layer = 0 if not use_gradual_unfreezing else total_layers-fine_tuning_arguments.gradual_unfreezing
+    start_layer = (
+        total_layers - fine_tuning_arguments.gradual_unfreezing
+        if use_gradual_unfreezing
+        else 0
+    )
     num_layers = total_layers - start_layer
 
     for i in range(start_layer, total_layers):
-        lr = base_lr if not layerwise_gradient_decay else base_lr * layerwise_gradient_decay ** (
-                    num_layers - i)
+        lr = (
+            base_lr * layerwise_gradient_decay ** (num_layers - i)
+            if layerwise_gradient_decay
+            else base_lr
+        )
         params.append({
             'params': layers[i].parameters(),
             'lr': lr
@@ -430,7 +440,7 @@ class TransformerBasedClassification(TransformerBasedEmbeddingMixin, PytorchClas
                scheduler, tmp_dir):
 
         stop = False
-        for epoch in range(0, self.num_epochs):
+        for epoch in range(self.num_epochs):
             if not stop:
                 start_time = datetime.datetime.now()
 
@@ -526,10 +536,10 @@ class TransformerBasedClassification(TransformerBasedEmbeddingMixin, PytorchClas
         if validate_every:
             valid_loss, valid_acc = np.mean(valid_losses), np.mean(valid_accs)
 
+        elif validate_every is None and sub_valid_ is not None:
+            valid_loss, valid_acc = self.validate(sub_valid_)
         else:
             valid_loss, valid_acc = None, None
-            if validate_every is None and sub_valid_ is not None:
-                valid_loss, valid_acc = self.validate(sub_valid_)
         train_loss = train_loss / len(sub_train_)
         train_acc = train_acc / len(sub_train_)
 

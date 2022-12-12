@@ -3,10 +3,7 @@ from small_text.base import LABEL_UNLABELED
 
 
 def list_length(x):
-    if hasattr(x, 'shape'):
-        return x.shape[0]
-    else:
-        return len(x)
+    return x.shape[0] if hasattr(x, 'shape') else len(x)
 
 
 def check_training_data(train_set, validation_set, weights=None):

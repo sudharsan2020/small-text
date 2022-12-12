@@ -131,7 +131,7 @@ class _KimCNNClassifierTest(object):
     def test_fit_with_early_stopping(self):
         dataset = self._get_dataset(num_samples=20, num_classes=4)
 
-        train_set = dataset[0:10]
+        train_set = dataset[:10]
         validation_set = dataset[10:]
 
         num_classes = 4
@@ -156,7 +156,7 @@ class _KimCNNClassifierTest(object):
     def test_fit_with_early_stopping_default(self):
         dataset = self._get_dataset(num_samples=20, num_classes=4)
 
-        train_set = dataset[0:10]
+        train_set = dataset[:10]
         validation_set = dataset[10:]
 
         num_classes = 4
@@ -180,7 +180,7 @@ class _KimCNNClassifierTest(object):
     def test_fit_with_early_stopping_disabled(self):
         dataset = self._get_dataset(num_samples=20, num_classes=4)
 
-        train_set = dataset[0:10]
+        train_set = dataset[:10]
         validation_set = dataset[10:]
 
         num_classes = 4
@@ -201,7 +201,7 @@ class _KimCNNClassifierTest(object):
     def test_fit_with_model_selection_default(self):
         dataset = self._get_dataset(num_samples=20, num_classes=4)
 
-        train_set = dataset[0:10]
+        train_set = dataset[:10]
         validation_set = dataset[10:]
 
         num_classes = 4
@@ -223,7 +223,7 @@ class _KimCNNClassifierTest(object):
     def test_fit_with_model_selection_none(self):
         dataset = self._get_dataset(num_samples=20, num_classes=4)
 
-        train_set = dataset[0:10]
+        train_set = dataset[:10]
         validation_set = dataset[10:]
 
         num_classes = 4

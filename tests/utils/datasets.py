@@ -45,12 +45,10 @@ def random_matrix_data(matrix_type, label_type, num_samples=100, num_dimension=4
 # TODO: is this obsolete?
 def random_labeling(num_classes, multi_label=False):
     label_values = np.arange(num_classes)
-    if multi_label:
-        num_labels = np.random.randint(num_classes)
-        label = np.random.choice(label_values, num_labels, replace=False).tolist()
-    else:
-        label = np.random.randint(num_classes)
-    return label
+    if not multi_label:
+        return np.random.randint(num_classes)
+    num_labels = np.random.randint(num_classes)
+    return np.random.choice(label_values, num_labels, replace=False).tolist()
 
 
 def random_labels(num_samples, num_classes, multi_label=False):
@@ -151,7 +149,7 @@ def assure_all_labels_occur(data, num_classes, multi_label=False):
     """Enforces that all labels occur in the data."""
     label_list = [labels for *_, labels in data
                   if isinstance(labels, int) or len(labels) > 0]
-    if len(label_list) == 0:
+    if not label_list:
         return data
 
     if not np.all([isinstance(element, int) for element in label_list]):
@@ -179,7 +177,7 @@ def random_transformer_dataset(num_samples, max_length=60, num_classes=2, multi_
         raise ValueError(f'Invalid test parameter value for target_labels: {str(target_labels)}')
 
     data = []
-    for i in range(num_samples):
+    for _ in range(num_samples):
         sample_length = np.random.randint(1, max_length)
         text = torch.cat([
             torch.randint(num_tokens, (sample_length,), dtype=dtype) + 1,
@@ -189,11 +187,11 @@ def random_transformer_dataset(num_samples, max_length=60, num_classes=2, multi_
             torch.tensor([1] * sample_length, dtype=dtype),
             torch.tensor([0] * (max_length - sample_length), dtype=dtype)
         ]).unsqueeze(0)
-        if multi_label:
-            labels = np.sort(random_labeling(num_classes, multi_label))
-        else:
-            labels = random_labeling(num_classes, multi_label)
-
+        labels = (
+            np.sort(random_labeling(num_classes, multi_label))
+            if multi_label
+            else random_labeling(num_classes, multi_label)
+        )
         data.append((text, mask, labels))
 
     data = assure_all_labels_occur(data, num_classes, multi_label=multi_label)

@@ -164,10 +164,7 @@ class SklearnDatasetView(DatasetView):
     @property
     def y(self):
         y_result = self.dataset.y[self.selection]
-        if self.is_multi_label:
-            return y_result
-        else:
-            return np.atleast_1d(y_result)
+        return y_result if self.is_multi_label else np.atleast_1d(y_result)
 
     @y.setter
     def y(self, y):
@@ -186,16 +183,8 @@ class SklearnDatasetView(DatasetView):
         raise UnsupportedOperationException('Cannot set target_labels on a DatasetView')
 
     def clone(self):
-        if isinstance(self.x, csr_matrix):
-            x = self.x.copy()
-        else:
-            x = np.copy(self.x)
-
-        if isinstance(self.y, csr_matrix):
-            y = self.y.copy()
-        else:
-            y = np.copy(self.y)
-
+        x = self.x.copy() if isinstance(self.x, csr_matrix) else np.copy(self.x)
+        y = self.y.copy() if isinstance(self.y, csr_matrix) else np.copy(self.y)
         dataset = self
         while hasattr(dataset, 'dataset'):
             dataset = dataset.dataset
@@ -217,10 +206,7 @@ class SklearnDatasetView(DatasetView):
 
 
 def is_multi_label(y):
-    if isinstance(y, csr_matrix):
-        return True
-    else:
-        return False
+    return isinstance(y, csr_matrix)
 
 
 def select(dataset, selection):
@@ -335,16 +321,8 @@ class SklearnDataset(Dataset):
         self._target_labels = target_labels
 
     def clone(self):
-        if isinstance(self._x, csr_matrix):
-            x = self._x.copy()
-        else:
-            x = np.copy(self._x)
-
-        if isinstance(self._y, csr_matrix):
-            y = self._y.copy()
-        else:
-            y = np.copy(self._y)
-
+        x = self._x.copy() if isinstance(self._x, csr_matrix) else np.copy(self._x)
+        y = self._y.copy() if isinstance(self._y, csr_matrix) else np.copy(self._y)
         if self.track_target_labels:
             target_labels = None
         else:
@@ -389,11 +367,7 @@ class SklearnDataset(Dataset):
 
         .. versionadded:: 1.1.0
         """
-        if train:
-            x = vectorizer.fit_transform(texts)
-        else:
-            x = vectorizer.transform(texts)
-
+        x = vectorizer.fit_transform(texts) if train else vectorizer.transform(texts)
         return SklearnDataset(x, y, target_labels=target_labels)
 
     def __getitem__(self, item):
@@ -451,7 +425,7 @@ def split_data(train_set, y=None, strategy='random', validation_set_size=0.1, re
         indices_train = list(range(len(train_set)))
         indices_train = np.array([i for i in indices_train if i not in set(indices_valid)])
     else:
-        raise ValueError('Invalid strategy: ' + strategy)
+        raise ValueError(f'Invalid strategy: {strategy}')
 
     if return_indices:
         return indices_train, indices_valid

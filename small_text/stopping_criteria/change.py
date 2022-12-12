@@ -33,7 +33,6 @@ class ClassificationChange(StoppingCriterion):
 
         if self.last_predictions is None:
             self.last_predictions = predictions
-            return False
         else:
             unchanged = np.equal(self.last_predictions, predictions)
             self.last_predictions = predictions
@@ -41,4 +40,5 @@ class ClassificationChange(StoppingCriterion):
             if unchanged.sum() >= predictions.shape[0] * (1 - self.threshold):
                 return True
 
-            return False
+
+        return False

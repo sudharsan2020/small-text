@@ -21,7 +21,7 @@ class SerializationTest(unittest.TestCase):
         query_strategy = RandomSampling()
 
         with tempfile.TemporaryDirectory() as tmp_dir_name:
-            file_str = tmp_dir_name + '/active_learner.pkl'
+            file_str = f'{tmp_dir_name}/active_learner.pkl'
             active_learner, ind_initial, ind_queried = self._write(file_str, query_strategy, clf_factory)
             self._load(file_str, query_strategy, ind_initial, ind_queried)
 
@@ -30,7 +30,7 @@ class SerializationTest(unittest.TestCase):
         query_strategy = RandomSampling()
 
         with tempfile.TemporaryDirectory() as tmp_dir_name:
-            file_path = Path(tmp_dir_name + '/active_learner.pkl')
+            file_path = Path(f'{tmp_dir_name}/active_learner.pkl')
             active_learner, ind_initial, ind_queried = self._write(file_path, query_strategy, clf_factory)
             self._load(file_path, query_strategy, ind_initial, ind_queried)
 
@@ -39,7 +39,7 @@ class SerializationTest(unittest.TestCase):
         query_strategy = RandomSampling()
 
         with tempfile.TemporaryDirectory() as tmp_dir_name:
-            file_str = tmp_dir_name + '/active_learner.pkl'
+            file_str = f'{tmp_dir_name}/active_learner.pkl'
             with open(file_str, 'wb') as f:
                 active_learner, ind_initial, ind_queried = self._write(f, query_strategy, clf_factory)
             with open(file_str, 'rb') as f:
@@ -54,7 +54,7 @@ class SerializationTest(unittest.TestCase):
 
         labels = np.random.randint(2, size=10)
         # fix the first two labels to guarantee the existence of both classes
-        labels[0:2] = [0, 1]
+        labels[:2] = [0, 1]
 
         active_learner.update(labels)
         active_learner.save(file)

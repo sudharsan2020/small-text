@@ -74,10 +74,7 @@ class SklearnClassifier(Classifier):
             If `False`, the classes are mutually exclusive, i.e. the prediction step results in
             exactly one predicted label per instance.
         """
-        if multi_label:
-            self.model = OneVsRestClassifier(model)
-        else:
-            self.model = model
+        self.model = OneVsRestClassifier(model) if multi_label else model
         self.num_classes = num_classes
         self.multi_label = multi_label
 
@@ -108,7 +105,7 @@ class SklearnClassifier(Classifier):
             raise ValueError('Invalid input: Given labeling is recognized as multi-label labeling '
                              'but the classifier is set to single-label mode')
 
-        fit_kwargs = dict() if self.multi_label else dict({'sample_weight': weights})
+        fit_kwargs = {} if self.multi_label else dict({'sample_weight': weights})
         self.model.fit(train_set.x, y, **fit_kwargs)
         return self
 
@@ -158,18 +155,17 @@ class ConfidenceEnhancedLinearSVC(LinearSVC):
         linearsvc_kwargs : dict, default=None
             Kwargs for the LinearSVC superclass.
         """
-        self.linearsvc_kwargs = dict() if linearsvc_kwargs is None else linearsvc_kwargs
+        self.linearsvc_kwargs = {} if linearsvc_kwargs is None else linearsvc_kwargs
         super().__init__(**self.linearsvc_kwargs)
 
     def predict(self, x, return_proba=False):
 
-        if return_proba:
-            proba = self.predict_proba(x)
-
-            target_class = np.argmax(proba, axis=1)
-            return target_class, proba
-        else:
+        if not return_proba:
             return super().predict(x)
+        proba = self.predict_proba(x)
+
+        target_class = np.argmax(proba, axis=1)
+        return target_class, proba
 
     def predict_proba(self, x):
 
@@ -182,12 +178,11 @@ class ConfidenceEnhancedLinearSVC(LinearSVC):
             for i, score in enumerate(scores):
                 proba[i, target[i]] = score
                 proba[i, target[i]-1] = 1-score
-            proba = normalize(proba, norm='l1')
-            return proba
         else:
             proba = np.apply_along_axis(self._sigmoid, -1, scores)
-            proba = normalize(proba, norm='l1')
-            return proba
+
+        proba = normalize(proba, norm='l1')
+        return proba
 
     def _sigmoid(self, x):
         return 1 / (1 + np.exp(-x))

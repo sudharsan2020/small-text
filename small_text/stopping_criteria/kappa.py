@@ -53,7 +53,4 @@ class KappaAverage(StoppingCriterion):
                 warnings.warn('Nan encountered within the list of kappa values', RuntimeWarning)
                 return True
 
-            if np.mean(deltas) < (1 - self.kappa):
-                return True
-            else:
-                return False
+            return np.mean(deltas) < 1 - self.kappa

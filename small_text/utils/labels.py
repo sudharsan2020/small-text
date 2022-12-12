@@ -10,19 +10,15 @@ def get_num_labels(y):
     if y.shape[0] == 0:
         raise ValueError('Invalid labeling: Cannot contain 0 labels')
 
-    if isinstance(y, csr_matrix):
-        return np.max(y.indices) + 1
-    else:
-        return np.max(y) + 1
+    return np.max(y.indices) + 1 if isinstance(y, csr_matrix) else np.max(y) + 1
 
 
 def remove_by_index(y, indices):
-    if isinstance(y, csr_matrix):
-        mask = np.ones(y.shape[0], dtype=bool)
-        mask[indices] = False
-        return y[mask, :]
-    else:
+    if not isinstance(y, csr_matrix):
         return np.delete(y, indices)
+    mask = np.ones(y.shape[0], dtype=bool)
+    mask[indices] = False
+    return y[mask, :]
 
 
 def get_ignored_labels_mask(y, ignored_label_value):

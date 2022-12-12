@@ -49,13 +49,12 @@ def random_initialization_stratified(y, n_samples=10, multilabel_strategy='label
     small_text.data.sampling.multilabel_stratified_subsets_sampling : Details on the `labelsets`
         multi-label strategy.
     """
-    if isinstance(y, csr_matrix):
-        if multilabel_strategy == 'labelsets':
-            return multilabel_stratified_subsets_sampling(y, n_samples=n_samples)
-        else:
-            raise ValueError(f'Invalid multilabel_strategy: {multilabel_strategy}')
-    else:
+    if not isinstance(y, csr_matrix):
         return stratified_sampling(y, n_samples=n_samples)
+    if multilabel_strategy == 'labelsets':
+        return multilabel_stratified_subsets_sampling(y, n_samples=n_samples)
+    else:
+        raise ValueError(f'Invalid multilabel_strategy: {multilabel_strategy}')
 
 
 def random_initialization_balanced(y, n_samples=10):
